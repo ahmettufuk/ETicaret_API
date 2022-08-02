@@ -1,5 +1,6 @@
 ﻿using ETicaret_API.Application.Absraction;
 using ETicaret_API.Application.Repositories;
+using ETicaret_API.Application.RequestParameters;
 using ETicaret_API.Application.ViewModels.Products;
 using ETicaret_API.Domain.Entities;
 using Microsoft.AspNetCore.Http;
@@ -22,7 +23,7 @@ namespace ETicaret_API.API.Controllers
         }
 
         [HttpGet]
-        public  async Task<IActionResult> Get()
+        public  async Task<IActionResult> Get([FromQuery]Pagination pagination)
         {
 
             //  await _productWriteRepository.AddAsync(new()
@@ -34,7 +35,20 @@ namespace ETicaret_API.API.Controllers
 
 
 
-            return Ok(_productReadRepository.GetAll(false));
+            // return Ok(_productReadRepository.GetAll(false));
+            var totalCount = _productReadRepository.GetAll(false).Count();
+           var products=  _productReadRepository.GetAll(false).Skip(pagination.Page * pagination.Size)
+            .Take(pagination.Size)
+            .Select(p => new
+            {
+                p.Id,
+                p.Name,
+                p.Stock,
+                p.Price,
+                p.CreatedDate,
+                p.UpdatedDate
+            }).ToList();
+            return Ok(new {totalCount,products});
             
         }
 
@@ -80,7 +94,10 @@ namespace ETicaret_API.API.Controllers
         {
             await _productWriteRepository.Remove(id);
             await _productWriteRepository.SaveAsync();
-            return Ok();
+            return Ok(new
+            {
+                message = "Product Deleted!"
+            });
         }
 
       
