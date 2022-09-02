@@ -95,6 +95,8 @@ namespace ETicaret_API.API.Controllers
         public async Task<IActionResult> Delete(string id)
         {
             await _productWriteRepository.Remove(id);
+
+
             await _productWriteRepository.SaveAsync();
             return Ok(new
             {
